@@ -24,6 +24,8 @@ var StateDetector = require("./src/modules/state/detector.js");
 var GameState = require("./src/modules/state/constants.js").GameState;
 var Collector = require("./src/modules/village/collector.js");
 var DeadBaseSearcher = require("./src/modules/battle/searcher.js");
+var Trainer = require("./src/modules/train/trainer.js");
+var Donator = require("./src/modules/donate/donator.js");
 
 // ==========================================
 // 全局变量
@@ -63,6 +65,8 @@ function init() {
     StateDetector.init();
     Collector.init();
     DeadBaseSearcher.init();
+    Trainer.init();
+    Donator.init();
 
     console.log("[Main] 模块初始化完成");
 
@@ -176,10 +180,17 @@ function handleHomeVillage() {
         Collector.collect(Utils);
     }
 
-    // TODO: 未来功能
-    // - 检查是否需要训练兵力
-    // - 检查是否需要捐赠
-    // - 检查是否开始搜索
+    // 检查是否需要训练
+    if (Trainer.needsTraining()) {
+        console.log("[Main] 执行自动训练...");
+        Trainer.trainTroops(Utils);
+    }
+
+    // 检查是否需要捐赠
+    if (Donator.needsDonationCheck()) {
+        console.log("[Main] 检查捐赠请求...");
+        Donator.checkAndDonate(Utils);
+    }
 
     // 示例: 自动开始搜索 (可配置)
     if (Settings.deadBase.enabled) {
@@ -356,6 +367,8 @@ function stop() {
     console.log("  主循环次数: " + loopCount);
     console.log("  收集统计: " + JSON.stringify(Collector.getStats()));
     console.log("  搜索统计: " + JSON.stringify(DeadBaseSearcher.getStats()));
+    console.log("  训练统计: " + JSON.stringify(Trainer.getStats()));
+    console.log("  捐赠统计: " + JSON.stringify(Donator.getStats()));
     console.log("========================================");
 }
 
