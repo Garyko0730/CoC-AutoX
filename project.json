@@ -1,0 +1,9 @@
+{
+  "name": "cocscript",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "main": "main.js",
+  "ignore": [
+    "build"
+  ]
+}

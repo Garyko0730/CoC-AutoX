@@ -1,0 +1,57 @@
+# ================================
+# CoC-AutoX .gitignore
+# AutoX.js 项目专用
+# ================================
+
+# --- 日志文件 ---
+logs/
+*.log
+
+# --- 输出文件 ---
+output/
+*.csv
+*.xlsx
+
+# --- 临时文件 ---
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# --- 操作系统 ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- IDE 配置 ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- Node.js (如果使用) ---
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# --- AutoX.js 运行时 ---
+# 截图缓存
+screenshots/
+# 调试输出
+debug/
+
+# --- 敏感信息 ---
+# 账号配置 (如有)
+*.secret.js
+*.private.js
+credentials.js
+
+# --- 构建产物 ---
+build/
+dist/
+
+# --- 测试覆盖率 ---
+coverage/
+.nyc_output/
