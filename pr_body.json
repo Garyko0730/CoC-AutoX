@@ -1,0 +1,6 @@
+{
+  "title": "feat: Migration to Android (Kotlin/Compose)",
+  "head": "feature/android-migration",
+  "base": "main",
+  "body": "This PR introduces the initial boilerplate for converting the CoC automation script into a native Android application using Kotlin and Jetpack Compose.\n\n### Changes:\n- Added BotEngine.kt: A Coroutine-based state machine for bot logic.\n- Added BotControlPanel.kt: A modern Jetpack Compose UI for bot control.\n- Initial build.gradle configuration for Android application.\n\nNext steps include implementing Accessibility Service and MediaProjection for screen capture and automated clicks."
+}
