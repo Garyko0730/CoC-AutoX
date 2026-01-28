@@ -20,7 +20,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.1'
+        kotlinCompilerExtensionVersion '1.5.8'
     }
 
     compileOptions {
@@ -47,6 +47,6 @@ dependencies {
     // DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
-    // OpenCV
-    implementation 'org.opencv:opencv:4.9.0'
+    // OpenCV (Using QuickBird wrapper for Maven Central availability)
+    implementation 'com.quickbirdstudios:opencv:4.5.3.0'
 }
