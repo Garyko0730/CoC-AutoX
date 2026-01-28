@@ -71,44 +71,88 @@ fun DashboardScreen(engine: BotEngine) {
 
 @Composable
 fun LogsScreen() {
-    // Placeholder for logs
-    val logs = remember { List(20) { "Log Entry #$it: System check OK." } }
+    val logs by bot.jarvis.coc.core.LogManager.logs.collectAsState()
     
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(logs) { log ->
-            Text(text = log, style = MaterialTheme.typography.bodySmall)
-            Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+            Column {
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text(
+                        text = log.formattedTime,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "[${log.level}]",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = when(log.level) {
+                            bot.jarvis.coc.core.LogLevel.ERROR -> MaterialTheme.colorScheme.error
+                            bot.jarvis.coc.core.LogLevel.WARN -> androidx.compose.ui.graphics.Color(0xFFFFA000)
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                    )
+                }
+                Text(
+                    text = log.message, 
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Divider(color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
 
 @Composable
 fun SettingsScreen() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    val settingsRepo = remember { bot.jarvis.coc.core.SettingsRepository(context) }
+    
+    val rootEnabled by settingsRepo.rootEnabled.collectAsState(initial = false)
+    val debugMode by settingsRepo.debugMode.collectAsState(initial = true)
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
         
-        var rootEnabled by remember { mutableStateOf(false) }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            Text("Use Root Access")
-            Switch(checked = rootEnabled, onCheckedChange = { rootEnabled = it })
+            Column {
+                Text("Use Root Access", style = MaterialTheme.typography.titleMedium)
+                Text("Requires SuperUser permission", style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(
+                checked = rootEnabled, 
+                onCheckedChange = { 
+                    scope.launch { settingsRepo.setRootEnabled(it) }
+                }
+            )
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
         
-        var debugMode by remember { mutableStateOf(true) }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            Text("Debug Mode (Save Screenshots)")
-            Switch(checked = debugMode, onCheckedChange = { debugMode = it })
+            Column {
+                Text("Debug Mode", style = MaterialTheme.typography.titleMedium)
+                Text("Save screenshots & verbose logs", style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(
+                checked = debugMode, 
+                onCheckedChange = { 
+                    scope.launch { settingsRepo.setDebugMode(it) }
+                }
+            )
         }
     }
 }
