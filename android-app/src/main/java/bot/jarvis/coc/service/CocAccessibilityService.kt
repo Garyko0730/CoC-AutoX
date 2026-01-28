@@ -5,7 +5,19 @@ import android.view.accessibility.AccessibilityEvent
 import android.graphics.Path
 import android.view.accessibility.AccessibilityNodeInfo
 
+import bot.jarvis.coc.core.InputManager
+
 class CocAccessibilityService : AccessibilityService() {
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        InputManager.registerAccessibilityService(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        InputManager.unregisterAccessibilityService()
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         // 用于监听游戏窗口变化或特定 UI 元素出现

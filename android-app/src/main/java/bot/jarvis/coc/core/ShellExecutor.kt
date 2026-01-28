@@ -4,6 +4,14 @@ import java.io.DataOutputStream
 
 object ShellExecutor {
     /**
+     * 检查 Root 权限
+     * Check if Root is available
+     */
+    fun isRootAvailable(): Boolean {
+        return exec("true")
+    }
+
+    /**
      * 在 Root 环境下执行命令
      * Executes a command in Root environment
      */
