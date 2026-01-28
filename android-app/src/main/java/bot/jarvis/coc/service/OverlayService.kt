@@ -37,16 +37,38 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         
+import bot.jarvis.coc.core.BotEngine
+import bot.jarvis.coc.ui.MainScreen
+
+class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
+
+    private lateinit var windowManager: WindowManager
+    private lateinit var overlayView: ComposeView
+    // ... imports ...
+
+    override fun onCreate() {
+        super.onCreate()
+        // ...
+        
         // Setup Compose View for Overlay
         overlayView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
             setContent {
-                // Initialize BotEngine (Singleton or DI in real app)
                 val engine = BotEngine(applicationContext) 
-                BotControlPanel(engine = engine)
+                
+                // Use new MainScreen with Navigation
+                Surface(
+                    modifier = Modifier.width(350.dp).height(500.dp), // Fixed size for overlay window
+                    shape = MaterialTheme.shapes.medium,
+                    shadowElevation = 8.dp
+                ) {
+                   MainScreen(engine = engine)
+                }
             }
         }
+        // ...
+
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
