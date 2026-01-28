@@ -12,6 +12,7 @@ sealed class BotState {
     object Monitor : BotState()
     object PostBattle : BotState()
     object Collecting : BotState()
+    object Training : BotState()
 }
 
 class BotEngine(
@@ -23,6 +24,7 @@ class BotEngine(
 
     private var job: Job? = null
     private val resourceCollector = bot.jarvis.coc.logic.ResourceCollector(context)
+    private val trainingManager = bot.jarvis.coc.logic.TrainingManager(context)
 
     fun start() {
         if (job?.isActive == true) return
@@ -49,6 +51,7 @@ class BotEngine(
         when (val currentState = _state.value) {
             is BotState.Preparation -> handlePreparation()
             is BotState.Collecting -> handleCollecting()
+            is BotState.Training -> handleTraining()
             is BotState.Searching -> handleSearching()
             is BotState.Attacking -> handleAttacking()
             is BotState.Monitor -> handleMonitor()
@@ -67,11 +70,20 @@ class BotEngine(
         android.util.Log.d("BotEngine", "Collecting Resources...")
         val foundSomething = resourceCollector.execute()
         if (!foundSomething) {
-            // If nothing found for a while, maybe we are done or screen is zoomed out?
-            // For now, loop or go to next state
-            // _state.value = BotState.Searching
+            // Nothing to collect, check troops?
+             _state.value = BotState.Training
         }
-        delay(2000) // Wait between collection cycles
+        delay(2000) 
+    }
+
+    private suspend fun handleTraining() {
+         android.util.Log.d("BotEngine", "Checking Troops...")
+         // Try to train
+         trainingManager.execute()
+         // If done or failed, assume we are ready to search (or wait)
+         // For now, loop back to collecting to wait
+         delay(5000)
+         _state.value = BotState.Collecting
     }
 
     private suspend fun handleSearching() {
