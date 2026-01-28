@@ -11,15 +11,18 @@ sealed class BotState {
     object Attacking : BotState()
     object Monitor : BotState()
     object PostBattle : BotState()
+    object Collecting : BotState()
 }
 
 class BotEngine(
+    private val context: android.content.Context,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 ) {
     private val _state = MutableStateFlow<BotState>(BotState.Idle)
     val state = _state.asStateFlow()
 
     private var job: Job? = null
+    private val resourceCollector = bot.jarvis.coc.logic.ResourceCollector(context)
 
     fun start() {
         if (job?.isActive == true) return
@@ -29,8 +32,8 @@ class BotEngine(
                 try {
                     tick()
                 } catch (e: Exception) {
-                    // Log error
-                    _state.value = BotState.Preparation
+                    android.util.Log.e("BotEngine", "Error in tick", e)
+                    _state.value = BotState.Idle // Stop on error for safety
                 }
                 delay(1000)
             }
@@ -45,6 +48,7 @@ class BotEngine(
     private suspend fun tick() {
         when (val currentState = _state.value) {
             is BotState.Preparation -> handlePreparation()
+            is BotState.Collecting -> handleCollecting()
             is BotState.Searching -> handleSearching()
             is BotState.Attacking -> handleAttacking()
             is BotState.Monitor -> handleMonitor()
@@ -54,8 +58,20 @@ class BotEngine(
     }
 
     private suspend fun handlePreparation() {
-        // TODO: Implement OCR check for Home Screen
-        // If army full -> _state.value = BotState.Searching
+        // Simple logic: Just go to collecting for now
+        delay(1000)
+        _state.value = BotState.Collecting
+    }
+
+    private suspend fun handleCollecting() {
+        android.util.Log.d("BotEngine", "Collecting Resources...")
+        val foundSomething = resourceCollector.execute()
+        if (!foundSomething) {
+            // If nothing found for a while, maybe we are done or screen is zoomed out?
+            // For now, loop or go to next state
+            // _state.value = BotState.Searching
+        }
+        delay(2000) // Wait between collection cycles
     }
 
     private suspend fun handleSearching() {
