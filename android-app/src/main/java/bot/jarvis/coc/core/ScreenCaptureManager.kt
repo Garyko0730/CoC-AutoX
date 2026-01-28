@@ -45,7 +45,7 @@ object ScreenCaptureManager {
         return null
     }
     
-    fun setMediaProjectionCapturer(capturer: ScreenCapturer) {
+    fun setMediaProjectionCapturer(capturer: ScreenCapturer?) {
         mediaProjectionCapturer = capturer
     }
 }
