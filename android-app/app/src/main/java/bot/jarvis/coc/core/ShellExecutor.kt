@@ -47,4 +47,10 @@ object ShellExecutor {
      * Screenshot (Root)
      */
     fun captureScreen(path: String) = exec("screencap -p $path")
+
+    /**
+     * 返回键 (Root)
+     * Back Button (Root)
+     */
+    fun pressBack() = exec("input keyevent KEYCODE_BACK")
 }

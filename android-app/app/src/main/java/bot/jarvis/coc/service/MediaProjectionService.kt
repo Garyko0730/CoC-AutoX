@@ -64,7 +64,12 @@ class MediaProjectionService : Service(), ScreenCapturer {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_START_CAPTURE) {
             val resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED)
-            val resultData = intent.getParcelableExtra<Intent>(EXTRA_RESULT_DATA)
+            val resultData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(EXTRA_RESULT_DATA)
+            }
             
             if (resultCode == Activity.RESULT_OK && resultData != null) {
                 startProjection(resultCode, resultData)
@@ -95,10 +100,18 @@ class MediaProjectionService : Service(), ScreenCapturer {
 
     private fun updateScreenMetrics() {
         val metrics = DisplayMetrics()
-        windowManager?.defaultDisplay?.getRealMetrics(metrics)
-        screenWidth = metrics.widthPixels
-        screenHeight = metrics.heightPixels
-        screenDensity = metrics.densityDpi
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = windowManager?.currentWindowMetrics
+            screenWidth = windowMetrics?.bounds?.width() ?: 0
+            screenHeight = windowMetrics?.bounds?.height() ?: 0
+            screenDensity = resources.configuration.densityDpi
+        } else {
+            @Suppress("DEPRECATION")
+            windowManager?.defaultDisplay?.getRealMetrics(metrics)
+            screenWidth = metrics.widthPixels
+            screenHeight = metrics.heightPixels
+            screenDensity = metrics.densityDpi
+        }
     }
 
     override fun capture(): Bitmap? {
@@ -129,7 +142,7 @@ class MediaProjectionService : Service(), ScreenCapturer {
         super.onDestroy()
         stopProjection()
         instance = null
-        ScreenCaptureManager.setMediaProjectionCapturer(null) // Unregister logic needed in Manager
+        ScreenCaptureManager.setMediaProjectionCapturer(null)
     }
 
     private fun stopProjection() {
@@ -151,17 +164,16 @@ class MediaProjectionService : Service(), ScreenCapturer {
     }
 
     private fun createNotification(): Notification {
-        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
         } else {
+            @Suppress("DEPRECATION")
             Notification.Builder(this)
-        }
-        
-        return builder
-            .setContentTitle("Jarvis CoC")
-            .setContentText("Screen Capture Active")
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .build()
+        }.apply {
+            setContentTitle("Jarvis CoC")
+            setContentText("Screen Capture Active")
+            setSmallIcon(android.R.drawable.ic_menu_camera)
+        }.build()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

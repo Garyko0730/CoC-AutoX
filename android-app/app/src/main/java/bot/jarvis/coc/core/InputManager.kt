@@ -56,6 +56,16 @@ object InputManager {
         return getProvider().swipe(x1, y1, x2, y2, duration)
     }
 
+    fun pressBack(): Boolean {
+        val accService = accessibilityService
+        return if (accService != null) {
+            accService.pressBack()
+            true
+        } else {
+            ShellExecutor.pressBack()
+        }
+    }
+
     private fun getProvider(): InputProvider {
         val accService = accessibilityService
         

@@ -51,4 +51,12 @@ class CocAccessibilityService : AccessibilityService() {
         gestureBuilder.addStroke(android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, duration))
         dispatchGesture(gestureBuilder.build(), null, null)
     }
+
+    /**
+     * 执行返回操作
+     * Performs a back button press
+     */
+    fun pressBack() {
+        performGlobalAction(GLOBAL_ACTION_BACK)
+    }
 }

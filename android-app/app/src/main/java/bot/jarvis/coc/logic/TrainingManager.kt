@@ -48,9 +48,8 @@ class TrainingManager(private val context: Context) {
         if (findAndClick("train_button")) {
             Log.i(TAG, "Troops training started.")
             delay(500)
-            // Close window (click X or Back) - TODO: Implement generic close
-            // For now, assume back works or click outside
-            InputManager.tap(100f, 100f) // Tap top left to close?
+            // Close window - try multiple methods
+            closeWindow()
             return true
         }
 
@@ -68,5 +67,65 @@ class TrainingManager(private val context: Context) {
             return true
         }
         return false
+    }
+    
+    /**
+     * Generic window closing method that tries multiple approaches
+     */
+    private fun closeWindow(): Boolean {
+        // Try 1: Look for close button (X) in common locations
+        val closeRegions = listOf(
+            android.graphics.Rect(650, 50, 750, 150),  // Top right
+            android.graphics.Rect(600, 100, 700, 200) // Slightly lower
+        )
+        
+        for (region in closeRegions) {
+            if (findAndClickInRegion(region)) {
+                Log.d(TAG, "Closed window with close button")
+                return true
+            }
+        }
+        
+        // Try 2: Use back button
+        InputManager.pressBack()
+        Log.d(TAG, "Used back button to close window")
+        return true
+    }
+    
+    /**
+     * Helper method to find and click any interactive element in a region
+     */
+    private fun findAndClickInRegion(region: android.graphics.Rect): Boolean {
+        val screen = ScreenCaptureManager.capture() ?: return false
+        
+        // Crop the screen to the specified region
+        val croppedScreen = android.graphics.Bitmap.createBitmap(
+            screen,
+            region.left,
+            region.top,
+            region.width(),
+            region.height()
+        )
+        
+        // Use template matching to find close buttons
+        val closeTemplates = listOf("btn_close.png", "btn_x.png", "icon_close.png")
+        
+        for (templateName in closeTemplates) {
+            val template = AssetLoader.getBitmap(context, templateName)
+            if (template != null) {
+                val match = VisionEngine.findTemplate(croppedScreen, template, 0.7)
+                if (match != null) {
+                    // Adjust coordinates to original screen
+                    val absoluteX = region.left + match.point.x
+                    val absoluteY = region.top + match.point.y
+                    InputManager.tap(absoluteX.toFloat(), absoluteY.toFloat())
+                    return true
+                }
+            }
+        }
+        
+        // Fallback: Click center of region if we can't find a specific button
+        InputManager.tap(region.centerX().toFloat(), region.centerY().toFloat())
+        return true
     }
 }
