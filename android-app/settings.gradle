@@ -10,7 +10,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // JitPack removed to reduce failure surface area
     }
 }
 rootProject.name = "JarvisCoC"
