@@ -25,10 +25,12 @@ jobs:
         with:
           gradle-version: '8.5'
           build-root-directory: android-app
+          cache-disabled: true # Disable cache to avoid 400 errors
 
       - name: Build with Gradle
         working-directory: android-app
-        run: gradle assembleDebug --stacktrace
+        # Run with --no-daemon to save memory and ensure clean state
+        run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
