@@ -25,14 +25,14 @@ jobs:
         with:
           gradle-version: '8.5'
           build-root-directory: android-app
-          cache-disabled: true # Disable cache to avoid 400 errors
-
-      - name: Grant Execute Permission
-        run: chmod +x android-app/gradlew
+          cache-disabled: true
 
       - name: Build with Gradle
         run: |
           cd android-app
+          # Generate wrapper if missing (since it's not in git)
+          gradle wrapper
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
