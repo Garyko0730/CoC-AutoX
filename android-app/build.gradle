@@ -8,4 +8,3 @@ buildscript {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
     }
 }
-// Repositories are managed in settings.gradle via dependencyResolutionManagement

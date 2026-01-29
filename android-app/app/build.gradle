@@ -62,5 +62,6 @@ dependencies {
     // DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
-    // OpenCV Disabled - No external dependencies that could fail
+    // OpenCV - Disabled for build stability
+    // implementation 'com.quickbirdstudios:opencv:4.5.3.0'
 }
