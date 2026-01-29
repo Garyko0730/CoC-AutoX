@@ -7,18 +7,30 @@ import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Point
-import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 
 object VisionEngine {
     private const val TAG = "VisionEngine"
+    private var isInitialized = false
 
     init {
         try {
+            // Try explicit load first
             System.loadLibrary("opencv_java4")
-            Log.i(TAG, "OpenCV library loaded successfully")
+            isInitialized = true
+            Log.i(TAG, "OpenCV library loaded successfully via System.loadLibrary")
         } catch (e: UnsatisfiedLinkError) {
-            Log.e(TAG, "Failed to load OpenCV library", e)
+            Log.w(TAG, "System.loadLibrary failed, trying OpenCVLoader...")
+            try {
+                if (org.opencv.android.OpenCVLoader.initDebug()) {
+                    isInitialized = true
+                    Log.i(TAG, "OpenCV library loaded successfully via OpenCVLoader")
+                } else {
+                    Log.e(TAG, "OpenCVLoader.initDebug() returned false")
+                }
+            } catch (ex: Exception) {
+                 Log.e(TAG, "Failed to load OpenCV", ex)
+            }
         }
     }
 
@@ -27,49 +39,42 @@ object VisionEngine {
         val confidence: Double
     )
 
-    /**
-     * 在屏幕截图中查找模板图片的位置
-     * Find template image within screen screenshot
-     */
     fun findTemplate(screen: Bitmap, template: Bitmap, threshold: Double = 0.8): MatchResult? {
+        if (!isInitialized) {
+            Log.e(TAG, "VisionEngine not initialized (OpenCV missing). Skipping match.")
+            return null
+        }
+
         val screenMat = Mat()
         val templateMat = Mat()
         val result = Mat()
 
         try {
-            // Convert Bitmaps to Mats
             Utils.bitmapToMat(screen, screenMat)
             Utils.bitmapToMat(template, templateMat)
 
-            // Convert to grayscale for performance (optional, but recommended for simple button matching)
             val screenGray = Mat()
             val templateGray = Mat()
             Imgproc.cvtColor(screenMat, screenGray, Imgproc.COLOR_BGR2GRAY)
             Imgproc.cvtColor(templateMat, templateGray, Imgproc.COLOR_BGR2GRAY)
 
-            // Create result matrix
             val resultCols = screenGray.cols() - templateGray.cols() + 1
             val resultRows = screenGray.rows() - templateGray.rows() + 1
+            if (resultCols <= 0 || resultRows <= 0) {
+                 Log.w(TAG, "Screen smaller than template!")
+                 return null
+            }
+            
             result.create(resultRows, resultCols, CvType.CV_32FC1)
 
-            // Template Matching
             Imgproc.matchTemplate(screenGray, templateGray, result, Imgproc.TM_CCOEFF_NORMED)
-
-            // Find best match
             val mmr = Core.minMaxLoc(result)
             
             if (mmr.maxVal >= threshold) {
-                Log.d(TAG, "Match found: ${mmr.maxVal} at ${mmr.maxLoc}")
-                // Return center point of the match
                 val centerX = mmr.maxLoc.x + template.width / 2
                 val centerY = mmr.maxLoc.y + template.height / 2
                 return MatchResult(Point(centerX, centerY), mmr.maxVal)
-            } else {
-                Log.d(TAG, "No match found. Max confidence: ${mmr.maxVal}")
             }
-
-            screenGray.release()
-            templateGray.release()
 
         } catch (e: Exception) {
             Log.e(TAG, "Error during template matching", e)
