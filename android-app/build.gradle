@@ -4,8 +4,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        // Downgrade AGP slightly to a very stable version if needed, but 8.2.2 is generally fine.
+        // Keeping current versions but ensuring repositories are simple.
         classpath 'com.android.tools.build:gradle:8.2.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
     }
 }
-// Repositories are managed in settings.gradle via dependencyResolutionManagement

@@ -62,6 +62,6 @@ dependencies {
     // DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
-    // OpenCV - JitPack build (modern version)
-    implementation 'com.github.opencv:opencv:4.9.0'
+    // OpenCV - Back to QuickBird (Maven Central) for stability
+    implementation 'com.quickbirdstudios:opencv:4.5.3.0'
 }
