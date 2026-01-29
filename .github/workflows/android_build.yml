@@ -30,7 +30,12 @@ jobs:
       - name: Build with Gradle
         run: |
           cd android-app
-          # Generate wrapper if missing (since it's not in git)
+          # Ensure wrapper exists and is executable
           gradle wrapper
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          
+          # Accept licenses just in case
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          
+          # Build with minimal daemon and max heap
+          ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m" --stacktrace
