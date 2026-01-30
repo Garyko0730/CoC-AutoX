@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import bot.jarvis.coc.core.BotEngine
 import bot.jarvis.coc.data.AppDataStore
+import bot.jarvis.coc.screens.CoordinatePickerActivity
 import bot.jarvis.coc.screens.MainScreen
 import bot.jarvis.coc.service.OverlayService
 import bot.jarvis.coc.theme.CoCAutoXTheme
